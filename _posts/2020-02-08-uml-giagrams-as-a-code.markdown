@@ -20,7 +20,8 @@ Alice <-- Bob: Another authentication Response
 @enduml
 {% endhighlight %}
 
-and we get this pretty image:
+and we get this pretty image:  
+
 <img src="{{site.baseurl}}/assets/img/puml_example.svg">
 
 [plant-uml]: https://plantuml.com/en/ 

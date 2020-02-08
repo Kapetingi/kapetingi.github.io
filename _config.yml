@@ -20,7 +20,7 @@
 
 title: My humble notes
 description: >- # this means to ignore newlines until "baseurl:"
-  Humble blog's of katarsis. Contains samples of architectures, tools, devOps, algorithms
+  Humble blog's of kapetingi. Contains samples of architectures, tools, devOps, algorithms
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 github_username:  kapetingi

@@ -47,10 +47,9 @@ To avoid MITM attack sing images, in that case you can be sure that you run unmo
 
 This is a list of useful command that you may use in you daily works with docker
 
-```shell script
+{% highlight shell %}
 
 docker -history <ImageId> # shows a all layers and it's size for paticular image
 
 docker system df # shows a docker disk usage
-
-```
+{% endhighlight %}

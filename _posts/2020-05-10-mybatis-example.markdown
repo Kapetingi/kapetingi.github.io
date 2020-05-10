@@ -29,28 +29,62 @@ benefits of that approach?
 
 So now let's move a little bit dipper and write some code
 
-To use MyBatis you have to add a maven  
+To use MyBatis you have to add a maven
 
-You’ll find this post in your `_posts` directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run `jekyll serve`, which launches a web server and auto-regenerates your site when a file is updated.
+{% highlight xml %}
 
-Jekyll requires blog post files to be named according to the following format:
+<dependency>
+    <groupId>org.mybatis.spring.boot</groupId>
+    <artifactId>mybatis-spring-boot-starter</artifactId>
+    <version>2.1.2</version>
+</dependency>
 
-`YEAR-MONTH-DAY-title.MARKUP`
-
-Where `YEAR` is a four-digit number, `MONTH` and `DAY` are both two-digit numbers, and `MARKUP` is the file extension representing the format used in the file. After that, include the necessary front matter. Take a look at the source for this post to get an idea about how it works.
-
-Jekyll also offers powerful support for code snippets:
-
-{% highlight ruby %}
-def print_hi(name)
-  puts "Hi, #{name}"
-end
-print_hi('Tom')
-#=> prints 'Hi, Tom' to STDOUT.
 {% endhighlight %}
 
-Check out the [Jekyll docs][jekyll-docs] for more info on how to get the most out of Jekyll. File all bugs/feature requests at [Jekyll’s GitHub repo][jekyll-gh]. If you have questions, you can ask them on [Jekyll Talk][jekyll-talk].
+Than you will be able to use MyBatis in your application. 
 
-[jekyll-docs]: https://jekyllrb.com/docs/home
-[jekyll-gh]:   https://github.com/jekyll/jekyll
-[jekyll-talk]: https://talk.jekyllrb.com/
+MyBatis provide a two approach how to describe your mapping via XML or annotation. We start with annotation and 
+then describe how to do it with XML. Let assume that we have next DB init script
+
+{% highlight sql %}
+
+CREATE TABLE employee(
+    id UUID,
+    first_name VARCHAR,
+    last_name VARCHAR,
+    salary SMALLINT,
+    manager_id UUID,
+    CONSTRAINT pk_employee PRIMARY KEY(id)
+);
+
+INSERT INTO employee
+VALUES
+    ('700d698d-6fa6-42d9-a5cc-a85c8c4ccbe6', 'Nick', 'Carter', '3000', null),
+    ('794d22e8-e5ff-46e0-8c50-94e363bf1249', 'Bruce', 'Kane', '1000', '700d698d-6fa6-42d9-a5cc-a85c8c4ccbe6');
+
+{% endhighlight %}
+
+Than to fetch all employees we can use next code
+
+{% highlight java %}
+
+@Mapper
+public interface EmployeeMapper {
+
+    @Select("Select " +
+            "first_name as firstName, " +
+            "last_name as lastName " +
+            "from employee")
+    List<Employee> findAllEmployees();
+}
+
+{% endhighlight %}
+
+
+
+To map entity correctly we should to assert an alias like a name for mapped entity. 
+
+Check out the [demo repo][demo] for more info on how to set up MyBatis on spring boot 
+
+[jekyll-docs]: https://github.com/Kapetingi/mybatis-demo
+

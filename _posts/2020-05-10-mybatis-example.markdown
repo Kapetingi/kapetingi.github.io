@@ -86,5 +86,5 @@ To map entity correctly we should to assert an alias like a name for mapped enti
 
 Check out the [demo repo][demo] for more info on how to set up MyBatis on spring boot 
 
-[jekyll-docs]: https://github.com/Kapetingi/mybatis-demo
+[demo]: https://github.com/Kapetingi/mybatis-demo
 

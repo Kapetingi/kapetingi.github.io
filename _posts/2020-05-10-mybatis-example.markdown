@@ -54,14 +54,16 @@ CREATE TABLE employee(
     last_name VARCHAR,
     salary SMALLINT,
     manager_id UUID,
+    birth_date DATE,
+    skills VARCHAR[],
     CONSTRAINT pk_employee PRIMARY KEY(id)
 );
 
 INSERT INTO employee
 VALUES
-    ('700d698d-6fa6-42d9-a5cc-a85c8c4ccbe6', 'Nick', 'Carter', '3000', null),
-    ('794d22e8-e5ff-46e0-8c50-94e363bf1249', 'Bruce', 'Kane', '1000', '700d698d-6fa6-42d9-a5cc-a85c8c4ccbe6');
-
+    ('700d698d-6fa6-42d9-a5cc-a85c8c4ccbe6', 'Nick', 'Carter', '3000', null, '1990-12-08', ARRAY['excel', 'java']),
+    ('794d22e8-e5ff-46e0-8c50-94e363bf1249', 'Bruce', 'Kane', '1000', '700d698d-6fa6-42d9-a5cc-a85c8c4ccbe6', '1986-02-24', ARRAY['MBA deegre']);
+    
 {% endhighlight %}
 
 Than to fetch all employees we can use next code
@@ -73,16 +75,55 @@ public interface EmployeeMapper {
 
     @Select("Select " +
             "first_name as firstName, " +
-            "last_name as lastName " +
+            "last_name as lastName, " +
+            "birth_date as date, " +
+            "skills as skills " +
             "from employee")
+    @Results(value = {
+            @Result(property = "skills", column = "skills", typeHandler = StringArrayTypeHandler.class)
+    })
     List<Employee> findAllEmployees();
 }
 
 {% endhighlight %}
 
 
+To map entity correctly we should to assert an alias like a name for mapped entity. But what we should to do 
+with skills. It's a array so how exactly we should map it to list of skills? for that propose we create class
+`StringArrayTypeHandler.class` that's extend a BaseTypeHandler
 
-To map entity correctly we should to assert an alias like a name for mapped entity. 
+{% highlight java %}
+
+
+public class StringArrayTypeHandler extends BaseTypeHandler<List<String>> {
+
+    @Override
+    public void setNonNullParameter(PreparedStatement preparedStatement, int i, List<String> strings, JdbcType jdbcType) throws SQLException {
+
+    }
+
+    @Override
+    public List<String> getNullableResult(ResultSet resultSet, String s) throws SQLException {
+        return convertToList(resultSet.getArray(s));
+    }
+
+    @Override
+    public List<String> getNullableResult(ResultSet resultSet, int i) throws SQLException {
+        return convertToList(resultSet.getArray(i));
+    }
+
+    @Override
+    public List<String> getNullableResult(CallableStatement callableStatement, int i) throws SQLException {
+        return convertToList(callableStatement.getArray(i));
+    }
+
+    List<String> convertToList(Array array) throws SQLException {
+        String[] strings = (String[]) array.getArray();
+        return Arrays.asList(strings);
+    }
+}
+
+{% endhighlight %}
 
 Check out the [demo repo][demo] for more info on how to set up MyBatis on spring boot 
 

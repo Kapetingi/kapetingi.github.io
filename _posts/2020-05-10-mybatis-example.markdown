@@ -5,18 +5,19 @@ date:   2020-05-10 22:21:53 +0100
 categories: jekyll update
 ---
 
-Whenever you want to create a application ypu have to persist data somewhere. Most serious
-functions need a proper DBMS for resolve this problem, but how we can handel a OOP entities
-with relation table together. There is no silver bullet to do this. The already existing solutions
-is ORM frameworks as Hibernate or persistence frameworks as MyBatis. What is the difference between of
+Whenever you want to create a application you have to save data somewhere. If your application 
+need to perform a more complex operation on data it will need a proper DBMS for resolve this problem. 
+However the question is shows up. How we can handel a OOP entities with relation table together. 
+There is no silver bullet to do this. The already existing solutions
+is ORM frameworks as Hibernate or persistence mapping frameworks as MyBatis. What is the difference between of
 them?
 
 * OMR - it is complex solution which provide a way to map and manage persistent entity. It's means 
-it not just map tables to objects but also mange a objects life cycle. The `EntityManager` play a 
+it not just map tables to objects but also manage a objects life cycle. The `EntityManager` play a 
 key role in that solution. It decided when to gt object from cache or put it there, how
 to flush cache entities to DB and build a queries for that.
 
-* persistent mapper - it more simple solution that just provide a easiest way to map you query result set 
+* Persistent mapper - it more simple solution that just provide a easiest way to map you query result set 
 to a entity. 
 
 As you see `persitent mapper` is more simple solution. There are not a lot of magic under the hood in it. 
@@ -124,6 +125,68 @@ public class StringArrayTypeHandler extends BaseTypeHandler<List<String>> {
 }
 
 {% endhighlight %}
+
+Ok it simple, but what if we need a more complex query? For example we want to select department with all
+employees. Then let's do it. First prepare DB
+
+{% highlight sql %}
+
+INSERT INTO department
+VALUES
+    ('cb3326b5-28c6-4f09-90a3-ae55d600f67b', 'hr department');
+
+CREATE TABLE department_employee(
+    id UUID,
+    id_department UUID NOT NULL
+        CONSTRAINT department_to_department_employee_fkey REFERENCES department(id),
+    id_employee UUID NOT NULL
+        CONSTRAINT employee_to_department_employee_fkey REFERENCES employee(id)
+);
+
+INSERT INTO department_employee
+    VALUES
+    ('9b628bbc-740b-46a7-adb3-76be4c7ac489','cb3326b5-28c6-4f09-90a3-ae55d600f67b','700d698d-6fa6-42d9-a5cc-a85c8c4ccbe6'),
+    ('4e1419ee-d9ec-48de-9792-40a7197706d9','cb3326b5-28c6-4f09-90a3-ae55d600f67b','794d22e8-e5ff-46e0-8c50-94e363bf1249');
+
+{% endhighlight %}
+
+Next write the mapper
+
+
+{% highlight java %}
+
+@Mapper
+public interface DepartmentMapper {
+
+    @Select("Select " +
+            "id as id, " +
+            "name as name, " +
+            "id as dp_id " +
+            "from department")
+    @Results(value = {
+            @Result(property = "employeeList", column = "dp_id", javaType = List.class, many = @Many(select = "getByDepartmentId")) // [1]
+    })
+    Department findDepartmentById(@Param("id") String id);
+
+    @Select("Select " +
+            "first_name as firstName, " +
+            "last_name as lastName, " +
+            "birth_date as date, " +
+            "skills as skills " +
+            "from employee emp " +
+            "join department_employee dp on dp.id_employee = emp.id " +
+            "where dp.id_department = uuid(#{id})")
+    @Results(value = {
+            @Result(property = "skills", column = "skills", typeHandler = StringArrayTypeHandler.class)
+    })
+    List<Employee> getByDepartmentId(@Param("id") String id);
+
+}
+{% endhighlight %}
+
+And now it's done! just pay attention on [1] we add type as list and point a mapper query. For more
+convenient way to handle sql you can try a XML mapping version, it will be in next post 
+
 
 Check out the [demo repo][demo] for more info on how to set up MyBatis on spring boot 
 
